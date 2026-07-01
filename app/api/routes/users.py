@@ -5,17 +5,21 @@ from app.api.dependencies import get_current_user
 from app.core.database import get_db
 from app.core.responses import success_response
 from app.models.user import User
-from app.schemas.user import UserUpdate
+from app.schemas.user import UserOutput, UserUpdate, UsersResponse
 from app.services.user_service import UserService
 
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
-@router.get("")
+@router.get("", response_model=UsersResponse)
 def get_users(db: Session = Depends(get_db)):
     users = UserService(db).get_all_users()
-    return success_response(data=users, message="Users fetched successfully")
+
+    return success_response(
+        data=users,
+        message="Users fetched successfully"
+    )
 
 
 @router.get("/{user_id}")

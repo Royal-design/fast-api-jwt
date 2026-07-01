@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
+from app.core.config import CLOUDINARY_PROFILE_FOLDER
 from app.core.database import get_db
 from app.core.responses import success_response
 from app.models.user import User
 from app.schemas.user import UserUpdate
+from app.services.cloudinary_service import CloudinaryService
 from app.services.profile_service import ProfileService
 from app.services.user_service import UserService
 
@@ -34,6 +36,21 @@ def update_my_profile(
 ):
     profile = profile_service.update_profile(current_user, user_update)
     return success_response(data=profile, message="Profile updated successfully")
+
+
+@router.patch("/me/image")
+def update_my_profile_image(
+    image: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    profile_service: ProfileService = Depends(get_profile_service),
+):
+    upload = CloudinaryService().upload_image(image, CLOUDINARY_PROFILE_FOLDER)
+    profile = profile_service.update_profile_image(
+        current_user,
+        upload["image_url"],
+        upload["image_public_id"],
+    )
+    return success_response(data=profile, message="Profile image updated successfully")
 
 
 @router.delete("/me")

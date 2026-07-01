@@ -1,21 +1,31 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import include_api_routes
-from app.core.database import Base, engine
+from app.core.config import CORS_ALLOWED_ORIGINS
 from app.core.exceptions import (
-    UserNotFoundError,
     EmailAlreadyExistsError,
+    ImageUploadError,
     InvalidCredentialsError,
     InvalidTokenException,
+    ProductNotFoundError,
+    UserNotFoundError,
 )
-
-# Import models so SQLAlchemy registers them
-from app.models.user import User
 
 app = FastAPI()
 
-Base.metadata.create_all(bind=engine)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        origin.strip()
+        for origin in CORS_ALLOWED_ORIGINS.split(",")
+        if origin.strip()
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 include_api_routes(app)
 
@@ -60,5 +70,27 @@ async def invalid_token_handler(
 ):
     return JSONResponse(
         status_code=401,
+        content={"detail": exc.message},
+    )
+
+
+@app.exception_handler(ProductNotFoundError)
+async def product_not_found_handler(
+    request: Request,
+    exc: ProductNotFoundError,
+):
+    return JSONResponse(
+        status_code=404,
+        content={"detail": exc.message},
+    )
+
+
+@app.exception_handler(ImageUploadError)
+async def image_upload_error_handler(
+    request: Request,
+    exc: ImageUploadError,
+):
+    return JSONResponse(
+        status_code=400,
         content={"detail": exc.message},
     )

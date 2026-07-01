@@ -20,3 +20,15 @@ class InvalidTokenException(Exception):
     def __init__(self, message: str = "Invalid or expired token"):
         self.message = message
         super().__init__(message)
+
+
+class ProductNotFoundError(Exception):
+    def __init__(self, message: str = "Product not found"):
+        self.message = message
+        super().__init__(message)
+
+
+class ImageUploadError(Exception):
+    def __init__(self, message: str = "Image upload failed"):
+        self.message = message
+        super().__init__(message)

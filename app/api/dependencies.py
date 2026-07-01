@@ -9,7 +9,7 @@ from app.models.user import User
 from app.services.user_service import UserService
 
 
-bearer_scheme = HTTPBearer()
+bearer_scheme = HTTPBearer(scheme_name="Bearer")
 
 
 def get_bearer_token(

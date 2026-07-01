@@ -13,8 +13,14 @@ class UserOutput(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    image_url: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
+    
+class UsersResponse(BaseModel):
+    status: bool
+    message: str
+    data: list[UserOutput]
 
 
 class UserUpdate(BaseModel):

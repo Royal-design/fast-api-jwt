@@ -13,3 +13,5 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
+    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    image_public_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
