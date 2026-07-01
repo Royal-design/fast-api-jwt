@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
@@ -23,6 +23,14 @@ def serialize_profile(user: User) -> UserOutput:
     return UserOutput.model_validate(user)
 
 
+def filled_fields(**fields):
+    return {
+        key: value
+        for key, value in fields.items()
+        if value is not None and value != ""
+    }
+
+
 @router.get("/me")
 def get_my_profile(
     current_user: User = Depends(get_current_user),
@@ -36,33 +44,36 @@ def get_my_profile(
 
 
 @router.patch("/me")
-def update_my_profile(
-    user_update: UserUpdate,
+async def update_my_profile(
+    first_name: str | None = Form(None),
+    last_name: str | None = Form(None),
+    email: str | None = Form(None),
+    password: str | None = Form(None),
+    image: UploadFile | None = File(None),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service),
 ):
+    user_update = UserUpdate.model_validate(
+        filled_fields(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password,
+        )
+    )
     profile = profile_service.update_profile(current_user, user_update)
+
+    if image:
+        upload = CloudinaryService().upload_image(image, CLOUDINARY_PROFILE_FOLDER)
+        profile = profile_service.update_profile_image(
+            profile,
+            upload["image_url"],
+            upload["image_public_id"],
+        )
+
     return success_response(
         data=serialize_profile(profile),
         message="Profile updated successfully",
-    )
-
-
-@router.patch("/me/image")
-def update_my_profile_image(
-    image: UploadFile = File(...),
-    current_user: User = Depends(get_current_user),
-    profile_service: ProfileService = Depends(get_profile_service),
-):
-    upload = CloudinaryService().upload_image(image, CLOUDINARY_PROFILE_FOLDER)
-    profile = profile_service.update_profile_image(
-        current_user,
-        upload["image_url"],
-        upload["image_public_id"],
-    )
-    return success_response(
-        data=serialize_profile(profile),
-        message="Profile image updated successfully",
     )
 
 

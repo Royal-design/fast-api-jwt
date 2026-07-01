@@ -11,7 +11,14 @@ class ProfileService:
         cloudinary_service: CloudinaryService | None = None,
     ):
         self.user_service = user_service
-        self.cloudinary_service = cloudinary_service or CloudinaryService()
+        self._cloudinary_service = cloudinary_service
+
+    @property
+    def cloudinary_service(self) -> CloudinaryService:
+        if self._cloudinary_service is None:
+            self._cloudinary_service = CloudinaryService()
+
+        return self._cloudinary_service
 
     def get_profile(self, current_user: User):
         return current_user

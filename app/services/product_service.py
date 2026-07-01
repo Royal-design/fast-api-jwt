@@ -13,7 +13,14 @@ class ProductService:
         cloudinary_service: CloudinaryService | None = None,
     ):
         self.db = db
-        self.cloudinary_service = cloudinary_service or CloudinaryService()
+        self._cloudinary_service = cloudinary_service
+
+    @property
+    def cloudinary_service(self) -> CloudinaryService:
+        if self._cloudinary_service is None:
+            self._cloudinary_service = CloudinaryService()
+
+        return self._cloudinary_service
 
     def get_all_products(self):
         return self.db.query(Product).all()
