@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import EmailAlreadyExistsError, UserNotFoundError
+from app.core.security import hash_password
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 
@@ -44,6 +45,14 @@ class UserService:
         db_user = self.get_user_by_id(user_id)
 
         updates = user.model_dump(exclude_unset=True)
+
+        if "email" in updates:
+            existing_user = self.get_user_by_email(updates["email"])
+            if existing_user and existing_user.id != user_id:
+                raise EmailAlreadyExistsError("Email already exists")
+
+        if "password" in updates:
+            updates["password"] = hash_password(updates["password"])
 
         for key, value in updates.items():
             setattr(db_user, key, value)

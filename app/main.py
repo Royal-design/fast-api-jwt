@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.api.router import api_router
+from app.api.router import include_api_routes
 from app.core.database import Base, engine
 from app.core.exceptions import (
     UserNotFoundError,
@@ -17,7 +17,7 @@ app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
 
-app.include_router(api_router)
+include_api_routes(app)
 
 
 @app.exception_handler(UserNotFoundError)
@@ -27,7 +27,7 @@ async def user_not_found_handler(
 ):
     return JSONResponse(
         status_code=404,
-        content={"detail": "User not found"},
+        content={"detail": exc.message},
     )
 
 
@@ -38,7 +38,7 @@ async def email_already_exists_handler(
 ):
     return JSONResponse(
         status_code=409,
-        content={"detail": "Email already exists"},
+        content={"detail": exc.message},
     )
 
 
@@ -49,7 +49,7 @@ async def invalid_credentials_handler(
 ):
     return JSONResponse(
         status_code=401,
-        content={"detail": "Invalid email or password"},
+        content={"detail": exc.message},
     )
 
 
@@ -60,5 +60,5 @@ async def invalid_token_handler(
 ):
     return JSONResponse(
         status_code=401,
-        content={"detail": "Invalid or expired token"},
+        content={"detail": exc.message},
     )

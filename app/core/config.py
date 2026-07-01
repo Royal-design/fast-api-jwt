@@ -7,3 +7,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = config(
     default=30,
     cast=int,
 )
+REFRESH_TOKEN_EXPIRE_DAYS = config(
+    "REFRESH_TOKEN_EXPIRE_DAYS",
+    default=7,
+    cast=int,
+)
