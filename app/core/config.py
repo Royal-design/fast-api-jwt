@@ -1,4 +1,12 @@
-from decouple import config
+from pathlib import Path
+
+from decouple import AutoConfig
+
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+config = AutoConfig(search_path=BASE_DIR)
+
+
 DATABASE_URL = config("DATABASE_URL")
 SECRET_KEY = config("SECRET_KEY")
 ALGORITHM = config("ALGORITHM", default="HS256")

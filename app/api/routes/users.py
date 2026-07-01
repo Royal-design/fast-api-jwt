@@ -12,12 +12,16 @@ from app.services.user_service import UserService
 router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
+def serialize_user(user: User) -> UserOutput:
+    return UserOutput.model_validate(user)
+
+
 @router.get("", response_model=UsersResponse)
 def get_users(db: Session = Depends(get_db)):
     users = UserService(db).get_all_users()
 
     return success_response(
-        data=users,
+        data=[serialize_user(user) for user in users],
         message="Users fetched successfully"
     )
 
@@ -25,7 +29,10 @@ def get_users(db: Session = Depends(get_db)):
 @router.get("/{user_id}")
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = UserService(db).get_user_by_id(user_id)
-    return success_response(data=user, message="User fetched successfully")
+    return success_response(
+        data=serialize_user(user),
+        message="User fetched successfully",
+    )
 
 
 @router.patch("/{user_id}")

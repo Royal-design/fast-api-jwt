@@ -1,3 +1,5 @@
+from email.mime import image
+
 from pydantic import BaseModel, EmailStr, ConfigDict
 
 
@@ -14,7 +16,7 @@ class UserOutput(BaseModel):
     last_name: str
     email: EmailStr
     image_url: str | None = None
-
+    image_public_id: str | None = None
     model_config = ConfigDict(from_attributes=True)
     
 class UsersResponse(BaseModel):
